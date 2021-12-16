@@ -1,0 +1,108 @@
+--=========================================================================
+-- FV 2016-17 - Practical Exercise 1
+--=========================================================================
+--=========================================================================
+-- TRAFFIC LIGHT CONTROLLER FOR A ONE-LANE BRIDGE
+--=========================================================================
+
+--=========================================================================
+-- Composition of system with a Buchi Automaton for a property
+--=========================================================================
+
+
+MODULE main
+  VAR
+    sys  : system;
+    nfba : neg_fmla_ba(sys);
+---------------------------------------------------------------------------
+-- Section 3.4, Q1: 
+---------------------------------------------------------------------------
+-- Complete the required property phi here.
+
+  LTLSPEC TRUE;
+
+
+---------------------------------------------------------------------------
+-- Section 3.4, Q1: 
+---------------------------------------------------------------------------
+-- Complete the module and property that emulates a Buchi Automaton for
+-- !phi.
+
+MODULE neg_fmla_ba(sys)
+  VAR
+    st : 0 .. 3;  -- <CHOOSE YOUR NUMBER OF STATES, AS APPROPRIATE>
+  ASSIGN
+    init(st) := 0;
+    next(st) := 0; -- <UPDATE THIS>
+
+  -- Add a property here that, if true, captures that there are *no*
+  -- accepting runs of the automaton.
+ 
+ LTLSPEC TRUE;
+
+
+
+--=========================================================================
+--Timer
+--=========================================================================
+#define TIME_LIMIT 3
+
+MODULE timer(reset)
+  VAR 
+    time : 0 .. TIME_LIMIT;
+  ASSIGN
+    init(time) := 0;
+    next(time) := 
+      case
+        reset : 0;
+        time = TIME_LIMIT : TIME_LIMIT;
+        TRUE : time + 1;
+      esac;
+  DEFINE
+    timeout := time = TIME_LIMIT;
+
+--=========================================================================
+-- System: Timer + Light Controller
+--=========================================================================
+
+MODULE system
+  VAR
+    -- State of controller
+    state : {all_stop1, all_stop2, w1, w2, e1, e2};
+    tim : timer(state = all_stop1);
+
+    -- Inputs to controller
+    at_w : boolean;
+    at_e : boolean;
+    on_bridge : boolean;
+
+    -- Outputs of controller
+    e_light : {rd, gn};
+    w_light : {rd, gn};
+
+  ASSIGN
+    w_light := (state = w1 | state = w2) ? gn : rd;
+    e_light := (state = e1 | state = e2) ? gn : rd;
+
+    init(state) := all_stop1;
+    next(state) :=
+      case 
+        state = all_stop1 & at_w : w1;
+        state = w1 & on_bridge : w2;
+        state = w1 & tim.timeout : all_stop2; 
+
+        state = w2 & (! on_bridge | tim.timeout) : all_stop2;
+
+        state = all_stop1 & at_e : e1;
+        state = e1 & on_bridge : e2;
+        state = e1 & tim.timeout : all_stop2; 
+
+        state = e2 & (! on_bridge | tim.timeout) : all_stop2;
+        
+        state = all_stop2 & !on_bridge : all_stop1;
+
+        TRUE : state;
+      esac;
+  
+
+

@@ -1,0 +1,78 @@
+--=========================================================================
+-- FV 2016-17 - Practical Exercise 1
+--=========================================================================
+--=========================================================================
+-- TRAFFIC LIGHT CONTROLLER FOR A ONE-LANE BRIDGE
+--=========================================================================
+
+
+--=========================================================================
+--Timer
+--=========================================================================
+#define TIME_LIMIT 3
+
+MODULE timer(reset)
+  VAR 
+    time : 0 .. TIME_LIMIT;
+  ASSIGN
+    init(time) := 0;
+    next(time) := 
+      case
+        reset : 0;
+        time = TIME_LIMIT : TIME_LIMIT;
+        TRUE : time + 1;
+      esac;
+  DEFINE
+    timeout := time = TIME_LIMIT;
+
+--=========================================================================
+-- Main: Timer + Light Controller
+--=========================================================================
+
+MODULE main
+  VAR
+    -- State of controller
+    state : {all_stop1, all_stop2, w1, w2, e1, e2};
+    tim : timer(state = all_stop1);
+
+    -- Inputs to controller
+    at_w : boolean;
+    at_e : boolean;
+    on_bridge : boolean;
+
+    -- Outputs of controller
+    e_light : {rd, gn};
+    w_light : {rd, gn};
+
+  ASSIGN
+    w_light := (state = w1 | state = w2) ? gn : rd;
+    e_light := (state = e1 | state = e2) ? gn : rd;
+
+    init(state) := all_stop1;
+    next(state) :=
+      case 
+        state = all_stop1 & at_w : w1;
+        state = w1 & on_bridge : w2;
+        state = w1 & tim.timeout : all_stop2; 
+
+        state = w2 & (! on_bridge | tim.timeout) : all_stop2;
+
+        state = all_stop1 & at_e : e1;
+        state = e1 & on_bridge : e2;
+        state = e1 & tim.timeout : all_stop2; 
+
+        state = e2 & (! on_bridge | tim.timeout) : all_stop2;
+        
+        state = all_stop2 & !on_bridge : all_stop1;
+
+        TRUE : state;
+      esac;
+  
+--==========================================================================
+-- Bring in properties to check
+--==========================================================================
+
+#include "bridge-properties.smv"
+
+
+

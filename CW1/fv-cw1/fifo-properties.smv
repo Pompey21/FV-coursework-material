@@ -1,0 +1,88 @@
+--=========================================================================
+-- FV 2021-22: Coursework 1
+--=========================================================================
+
+
+--=========================================================================
+-- PROPERTIES OF FIFO
+--=========================================================================
+-- This file is not a standalone NuSMV file: it is to be included in
+-- fifo.smv or fifo-fixed.smv.
+
+-- The CTL and LTL properties in this file are numbered.  To have
+-- NuSMV check just the property numbered <p>, run it with the added
+-- option -n <p>.
+
+-- NuSMV always numbers CTL properties first, so the numbers for the
+-- LTL properties do not start from 0.
+
+
+---------------------------------------------------------------------------
+--  Question 4a. LTL Properties
+---------------------------------------------------------------------------
+
+
+--2: (i)
+  -- prints the right values!
+LTLSPEC G (!full | !empty);
+  -- TRUE;
+
+--3: (ii)
+ -- prints the right value!
+LTLSPEC (G write & G !read) -> F full
+  -- TRUE;
+
+--4: (iii)
+-- prints the right value!
+LTLSPEC G ((write & wr_data=0ud1_1 & ! full & G F read) -> F (rd_data=0ud1_1))
+  -- TRUE;
+
+--5: (iv)
+-- prints the right value!
+LTLSPEC G ( (write & wr_data=data1 & ! full & G F read) -> F (rd_data=data1))
+  -- TRUE;
+
+
+--6: (v)
+-- prints the right value!
+LTLSPEC G ((write & wr_data=0ud1_1 & ! full & G F read) -> X((!empty) U rd_data=0ud1_1))
+  -- TRUE;
+
+--7: (vi)
+-- prints the right value!
+LTLSPEC G (((write & wr_data=data1 & !full) & X(write & wr_data=data2 & !full) & G F read) -> F ((read & rd_data=data1) & X rd_data=data2))
+  -- TRUE;
+
+---------------------------------------------------------------------------
+-- Question 4b, CTL properties
+---------------------------------------------------------------------------
+
+--0: (i)
+-- prints the right value!
+CTLSPEC EF EG full 
+  -- TRUE;
+
+--1: (ii)
+-- prints the right value!
+CTLSPEC AG(full -> EF empty)
+  -- TRUE;
+
+---------------------------------------------------------------------------
+-- Question 5a
+---------------------------------------------------------------------------
+
+--8:
+LTLSPEC G(empty -> rd_p = wr_p)
+  -- FALSE;
+
+---------------------------------------------------------------------------
+-- Question 5b Description of counter example behaviour
+---------------------------------------------------------------------------
+-- Formula for the counter example:
+-- G (empty -> (rd_p = wr_p))
+-- The counter example is showing that there can be an example when the system 
+-- is supposedly empty but the read and write pointers are not the same! 
+-- The example starts with both pointers being at state 0 and then we have 
+-- 1) write => write pointer moves
+-- 2) read & write => both pointers move, but the state is set to empty!
+

@@ -1,0 +1,232 @@
+--=========================================================================
+-- FV 2021-22: Coursework 1, Question 3
+--=========================================================================
+
+----------------------------------------------------------------------------
+-- Module bringing together modules showing inequivalence
+----------------------------------------------------------------------------
+
+MODULE main
+VAR
+  a : model_a;
+  b : model_b;
+  c : model_c;
+  e : model_e;
+  f : model_f;
+  g : model_g;
+  h : model_h;
+  i : model_i;
+  j : model_j;
+     
+
+----------------------------------------------------------------------------
+-- Part (a) (solution partly filled in)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_a
+VAR
+    state: {s1,s2,s3};
+DEFINE
+    phi := state = s1;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : {s2,s3};
+          (state = s2) : s2;
+          (state = s3) : s3;
+        esac;
+
+CTLSPEC EF phi
+CTLSPEC EG phi
+
+----------------------------------------------------------------------------
+-- Part (b) 
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_b
+VAR
+    state: {s1,s2};
+DEFINE
+    phi := state = s2;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : {s1,s2};
+          (state = s2) : s1;
+        esac;
+
+CTLSPEC EX EG phi
+CTLSPEC EG EX phi
+
+----------------------------------------------------------------------------
+-- Part (c)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_c
+VAR
+    state: {s1,s2,s3};
+DEFINE
+    a := state = s2;
+    b := state = s3;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : {s2,s3};
+          (state = s2) : s2;
+          (state = s3) : s3;
+        esac;
+
+CTLSPEC AF a | AF b
+CTLSPEC AF (a | b)
+
+----------------------------------------------------------------------------
+-- Part (d)
+----------------------------------------------------------------------------
+-- Formulas equivalent? Yes
+
+-- Brief Explanation
+-- Equivalance 1 (eq1): True
+-- Equivalance 2 (eq2): AG a => EG a
+-- The equivalances eq1 and eq2 are equivalent as they are both stating that the 
+-- system must at all states hold for phi. Eq1 is in that sense very obvious and 
+-- does not need further explanation. In terms of Eq2 it states that for every path 
+-- 'a' must globally hold, which means it must hold in any state of the system. And if 
+-- that is so, then EG a must hold, which of course holds since AG 'a' holds already.
+-- Hence, Eq2 also states that it must hold at all states.
+
+----------------------------------------------------------------------------
+-- Part (e)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_e
+VAR
+    state: {s1,s2};
+DEFINE
+    phi := state = s2;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : s2;
+          (state = s2) : s2;
+        esac;
+
+CTLSPEC AG phi
+CTLSPEC phi | AX AG phi
+
+----------------------------------------------------------------------------
+-- Part (f)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_f
+VAR
+    state: {s1,s2};
+DEFINE
+    phi := state = s2;
+ASSIGN
+    init(state) := s2;
+    next(state) :=
+        case
+          (state = s1) : s2;
+          (state = s2) : s1;
+        esac;
+
+CTLSPEC EF EG phi
+CTLSPEC EG EF phi
+
+
+----------------------------------------------------------------------------
+-- Part (g)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_g
+VAR
+    state: {s1,s2};
+DEFINE
+    phi := state = s1 | state = s2;
+    psi := state = s2;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : s2;
+          (state = s2) : s2;
+        esac;
+
+CTLSPEC E [phi U psi]
+CTLSPEC E [phi U (!phi & psi)]
+
+----------------------------------------------------------------------------
+-- Part (h)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_h
+VAR
+    state: {s1,s2,s3};
+DEFINE
+    phi := state = s1;
+    psi := state = s2 | state = s3;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : s2;
+          (state = s2) : s3;
+          (state = s3) : s3;
+        esac;
+
+CTLSPEC AG (phi -> psi)
+CTLSPEC (EX phi -> EX psi)
+
+----------------------------------------------------------------------------
+-- Part (i)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_i
+VAR
+    state: {s1,s2,s3};
+DEFINE
+    phi := state = s2;
+ASSIGN
+    init(state) := s1;
+    next(state) :=
+        case
+          (state = s1) : s2;
+          (state = s2) : s3;
+          (state = s3) : s2;
+        esac;
+
+CTLSPEC AF AG phi
+CTLSPEC AG AF phi
+
+
+----------------------------------------------------------------------------
+-- Part (j)
+----------------------------------------------------------------------------
+-- Formulas equivalent? No
+
+MODULE model_j
+VAR
+    state: {s1,s2};
+DEFINE
+    phi := state in {s1,s2};
+    psi := FALSE;
+ASSIGN
+    init(state) := s1;
+    next(state) := s2;
+
+CTLSPEC !E [!psi U (!phi & !psi)]
+CTLSPEC A [psi U (phi & psi)]
+
+

@@ -1,0 +1,21 @@
+MODULE main
+VAR
+    state: {s1,s2};
+DEFINE
+    a := state = s2;
+
+ASSIGN
+    init(state) := s2;
+    next(state) := 
+        case
+            (state = s1) : s2;
+            (state = s2) : {s1,s2};
+        esac;
+
+
+----------------------------------------------------------------------------
+-- Part (a)
+----------------------------------------------------------------------------
+
+-- Query for checking validity
+LTLSPEC G F a;
